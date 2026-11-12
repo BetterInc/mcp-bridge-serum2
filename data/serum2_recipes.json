@@ -1,0 +1,561 @@
+{
+  "_about": {
+    "version": 1,
+    "target": "Serum 2 (VST3) as exposed by FL Studio 2026 plugin parameters; names verified against docs/serum2/params.json",
+    "value_format": "Values are FL display strings (real units). The bridge resolves each by sweeping the parameter's normalized value and matching FL's display text (e.g. 'Filter 1 Freq' -> '180 Hz', 'A Octave' -> '-1 oct', 'A Level' -> '75%' matches '75% [-5.0 dB]'). Plain numbers (e.g. unison 7) match the leading number of the display text.",
+    "notes_format": "pattern.notes = [[beat, length_beats, semitones_from_root, velocity], ...] over pattern.bars; root_midi is standard MIDI (33 = A1 = 55 Hz; FL's piano roll shows it one octave higher, as 'A2').",
+    "not_settable": "Serum 2 does NOT expose modulation-matrix source/destination (only 'Mod N Amount'/'Mod N Out' of slots that already exist in the loaded preset), oscillator wavetable choice, LFO shapes, or FX types (only generic 'FX Bus N Param k'). Those are listed under not_a_parameter. Modulation the bridge must recreate is given under host_automation (FL automation clips on a Serum parameter, e.g. a tempo-synced LFO on 'Filter 1 Freq'), and FX under mixer_fx (FL native plugins on the channel's mixer insert).",
+    "init_assumption": "Start from Serum 2's default init patch (Osc A = basic saw wavetable). Recipes set every relevant parameter explicitly so the previous state does not leak in: disable what is not used ('B Enable','C Enable','Noise Enable','Sub Enable' = 'Off')."
+  },
+
+  "techno": {
+    "tempo": [128, 140],
+    "key_hint": "minor; A, F, G minor are common. Bass often one root note with octave jumps.",
+    "bass": {
+      "name": "Rolling techno rumble bass (plucked saw + sine sub, offbeat 16ths, kick slot left empty)",
+      "fundamental_hz": {"osc_a": 55.0, "sub": 55.0, "lowest": 55.0, "root_midi": 33},
+      "params": {
+        "Main Vol": "70%", "Mono Toggle": "On", "Legato": "Off", "Porta Time": "0.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "70%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 1, "A Uni Detune": "0.00", "A Uni Blend": "0", "A Uni Width": "0", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "60%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 24", "Filter 1 Freq": "240 Hz", "Filter 1 Res": "22 %", "Filter 1 Drive": "35 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "0.5 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "150 ms", "Env 1 Sustain": "-inf", "Env 1 Release": "35 ms",
+        "Env 2 Attack": "0.5 ms", "Env 2 Hold": "0.0 ms", "Env 2 Decay": "90 ms", "Env 2 Sustain": "0%", "Env 2 Release": "40 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "init saw (Basic Shapes saw); a square or ICanHasKick-style table also works", "Mod routing": "Env 2 -> Filter 1 Freq about +30% (pluck); Velocity -> Filter 1 Freq so quiet ghost notes are darker. Only 'Mod N Amount' of an existing slot is settable", "Rumble layer": "the 'rumble' in techno is usually a separate reverb-smeared kick layer (kick -> reverb -> distortion -> LP ~120 Hz, sidechained), not this synth"},
+      "host_automation": [{"param": "Filter 1 Freq", "shape": "ramp_up", "rate": "8 bars", "min": "200 Hz", "max": "450 Hz", "purpose": "slow opening over a phrase"}],
+      "mixer_fx": [
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 30 Hz, cut ~100 Hz if the kick rumble owns it, LP 3 kHz"},
+        {"plugin": "Fruity Blood Overdrive", "intent": "gentle saturation so it reads on small speakers"},
+        {"plugin": "Fruity Balance", "intent": "sidechain duck from the kick (bridge fl_sidechain), release ~100 ms"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 33, "notes": [[0.25, 0.2, 0, 0.6], [0.5, 0.2, 0, 0.9], [0.75, 0.2, 0, 0.75], [1.25, 0.2, 0, 0.6], [1.5, 0.2, 0, 0.9], [1.75, 0.2, 0, 0.75], [2.25, 0.2, 0, 0.6], [2.5, 0.2, 0, 0.9], [2.75, 0.2, 0, 0.75], [3.25, 0.2, 0, 0.6], [3.5, 0.2, 12, 0.9], [3.75, 0.2, 0, 0.75], [4.25, 0.2, 0, 0.6], [4.5, 0.2, 0, 0.9], [4.75, 0.2, 0, 0.75], [5.25, 0.2, 0, 0.6], [5.5, 0.2, 0, 0.9], [5.75, 0.2, 0, 0.75], [6.25, 0.2, 0, 0.6], [6.5, 0.2, 0, 0.9], [6.75, 0.2, 0, 0.75], [7.25, 0.2, 3, 0.6], [7.5, 0.2, 0, 0.9], [7.75, 0.2, -2, 0.75]]},
+      "sources": [
+        "https://www.attackmagazine.com/technique/tutorials/warehouse-rolling-techno-bass/",
+        "https://www.youtube.com/watch?v=ZQVu7sRI3rA",
+        "https://www.youtube.com/watch?v=fGom9U_3ylA",
+        "https://www.youtube.com/watch?v=Z0iqbrZ2qg4",
+        "https://www.productionmusiclive.com/blogs/news/how-to-make-a-rolling-bassline",
+        "https://www.soundbridge.io/deep-analog-techno-bass-tutorial"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Dark techno stab (short detuned chord hit)",
+      "params": {
+        "Main Vol": "60%", "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "70%", "A Octave": "0 oct", "A Unison": 4, "A Uni Detune": "0.12", "A Uni Blend": "70", "A Uni Width": "100",
+        "B Enable": "On", "B Level": "50%", "B Octave": "-1 oct", "B Unison": 1,
+        "C Enable": "Off", "Noise Enable": "Off", "Sub Enable": "Off",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 24", "Filter 1 Freq": "900 Hz", "Filter 1 Res": "35 %", "Filter 1 Drive": "30 %",
+        "Env 1 Attack": "1.0 ms", "Env 1 Decay": "260 ms", "Env 1 Sustain": "-inf", "Env 1 Release": "120 ms"
+      },
+      "not_a_parameter": {"Osc B wavetable": "square"},
+      "mixer_fx": [{"plugin": "Fruity Delay 3", "intent": "dotted 1/8 feedback ~35%, dark"}, {"plugin": "Fruity Reeverb 2", "intent": "large dark room, 20% wet"}],
+      "pattern": {"bars": 2, "root_midi": 57, "chord": [0, 3, 7], "notes": [[0.5, 0.25, 0, 0.8], [2.75, 0.25, 0, 0.7], [4.5, 0.25, 0, 0.8], [6.25, 0.25, -2, 0.7]]}
+    },
+    "sources": [
+      "https://www.attackmagazine.com/technique/tutorials/warehouse-rolling-techno-bass/",
+      "https://www.audiotent.com/blogs/production-tips/synthesizing-a-bass-from-scratch",
+      "https://www.soundbridge.io/deep-analog-techno-bass-tutorial",
+      "https://www.musicradar.com/how-to/how-to-program-a-melodic-techno-synth-sound"
+    ]
+  },
+
+  "house": {
+    "tempo": [120, 126],
+    "key_hint": "minor or dorian; F, G, A minor. Syncopated bass around the kick, organ/M1 flavour.",
+    "bass": {
+      "name": "Deep house organ/sub bass (saw + octave-up organ partial + sine sub, rounded low-pass, syncopated)",
+      "fundamental_hz": {"osc_a": 65.4, "sub": 65.4, "lowest": 65.4, "root_midi": 36},
+      "params": {
+        "Main Vol": "68%", "Mono Toggle": "On", "Legato": "Off", "Porta Time": "0.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "60%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 1, "A Uni Detune": "0.00", "A Uni Blend": "0", "A Uni Width": "0", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "On", "B Level": "30%", "B Octave": "1 oct", "B Semi": "0 semitones", "B Fine": "0 cents", "B Unison": 1, "B Uni Detune": "0.00", "B Uni Blend": "0", "B Uni Width": "0", "B WT Pos": "1", "B Warp Mode": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "75%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "520 Hz", "Filter 1 Res": "10 %", "Filter 1 Drive": "20 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "1.0 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "320 ms", "Env 1 Sustain": "-6.0 dB", "Env 1 Release": "70 ms",
+        "Env 2 Attack": "1.0 ms", "Env 2 Hold": "0.0 ms", "Env 2 Decay": "180 ms", "Env 2 Sustain": "0%", "Env 2 Release": "60 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "init saw; for the M1 'organ' bass use a square/organ table (or additive sine + 2nd + 3rd harmonics)", "Osc B wavetable": "sine or square (organ 4' drawbar); init table if not changed", "Mod routing": "Env 2 -> Filter 1 Freq about +20% for the percussive organ 'click'"},
+      "host_automation": [],
+      "mixer_fx": [
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 30 Hz, slight boost ~120 Hz, LP 4 kHz"},
+        {"plugin": "Fruity Chorus", "intent": "very subtle, high band only (keep lows mono)"},
+        {"plugin": "Fruity Balance", "intent": "light sidechain from kick"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 36, "notes": [[0.5, 0.4, 0, 0.95], [1.5, 0.25, 0, 0.8], [1.75, 0.25, 12, 0.7], [2.5, 0.4, 0, 0.9], [3.25, 0.25, 7, 0.75], [3.5, 0.4, 10, 0.85], [4.5, 0.4, 0, 0.95], [5.5, 0.25, 0, 0.8], [5.75, 0.25, 12, 0.7], [6.5, 0.4, 0, 0.9], [7.25, 0.25, 3, 0.75], [7.5, 0.4, 5, 0.85]]},
+      "sources": [
+        "https://www.youtube.com/watch?v=OXIw7eqeHNg",
+        "https://www.youtube.com/watch?v=5woj7y_hHho",
+        "https://www.youtube.com/watch?v=ySi9sP8QxUg",
+        "https://www.youtube.com/watch?v=gOtad2X17Ok",
+        "https://www.adsrsounds.com/serum-tutorials/deep-house-organ-bass-in-serum/",
+        "https://www.syntorial.com/community/topic/patch-challenge-house-organ/"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Warm house chord pad",
+      "params": {
+        "Main Vol": "55%", "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "70%", "A Octave": "0 oct", "A Unison": 5, "A Uni Detune": "0.10", "A Uni Blend": "70",
+        "B Enable": "On", "B Level": "45%", "B Octave": "1 oct", "B Unison": 3, "B Uni Detune": "0.08",
+        "C Enable": "Off", "Noise Enable": "Off", "Sub Enable": "Off",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "2500 Hz", "Filter 1 Res": "10 %",
+        "Env 1 Attack": "120 ms", "Env 1 Decay": "1.00 s", "Env 1 Sustain": "-4.0 dB", "Env 1 Release": "600 ms"
+      },
+      "mixer_fx": [{"plugin": "Fruity Chorus", "intent": "subtle width"}, {"plugin": "Fruity Reeverb 2", "intent": "hall, 30% wet"}],
+      "pattern": {"bars": 4, "root_midi": 53, "chord": [0, 3, 7, 10], "notes": [[0, 3.5, 0, 0.7], [4, 3.5, -2, 0.7], [8, 3.5, -4, 0.7], [12, 3.5, -2, 0.7]]}
+    },
+    "sources": [
+      "https://www.adsrsounds.com/serum-tutorials/deep-house-organ-bass-in-serum/",
+      "https://www.adsrsounds.com/serum-tutorials/korg-m1-bass-robin-s-show-love-bass/",
+      "https://www.adsrsounds.com/serum-tutorials/how-to-design-bass-for-different-genres-in-serum/"
+    ]
+  },
+
+  "tech_house": {
+    "tempo": [124, 128],
+    "key_hint": "minor; G, A minor. Rolling 3-note-per-beat bass that rests on the kick.",
+    "bass": {
+      "name": "Plucky rolling tech house bass (Stussy-style 3-note roll: tonic / 5th / octave, sine body + detuned saw)",
+      "fundamental_hz": {"osc_a": 55.0, "sub": 55.0, "lowest": 55.0, "root_midi": 33},
+      "params": {
+        "Main Vol": "70%", "Mono Toggle": "On", "Legato": "Off", "Porta Time": "0.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "40%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "6 cents", "A Unison": 1, "A Uni Detune": "0.00", "A Uni Blend": "0", "A Uni Width": "0", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "80%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 24", "Filter 1 Freq": "200 Hz", "Filter 1 Res": "8 %", "Filter 1 Drive": "25 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "1.0 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "200 ms", "Env 1 Sustain": "-4.4 dB", "Env 1 Release": "80 ms",
+        "Env 2 Attack": "1.0 ms", "Env 2 Hold": "0.0 ms", "Env 2 Decay": "80 ms", "Env 2 Sustain": "30%", "Env 2 Release": "100 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "init saw (the source uses Basic Shapes saw at 30-40% under a sine body; here the Sub osc is the sine body)", "Mod routing": "Env 2 -> Filter 1 Freq +40% (opens to ~600-800 Hz per note = the pluck)", "Groove": "swing 56-58% and 5-15 ms micro-timing nudges on 3-4 notes per bar (do in FL)"},
+      "host_automation": [{"param": "Filter 1 Freq", "shape": "ramp_up", "rate": "8 bars", "min": "180 Hz", "max": "420 Hz", "purpose": "build tension into the drop"}],
+      "mixer_fx": [
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 30 Hz, small boost 2 kHz for the click"},
+        {"plugin": "Fruity Soft Clipper", "intent": "mild saturation"},
+        {"plugin": "Fruity Balance", "intent": "sidechain 5-7 dB, release ~110 ms at 124 BPM"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 33, "notes": [[0.0, 0.15, 0, 0.87], [0.5, 0.18, 0, 0.55], [1.0, 0.23, 7, 0.65], [1.25, 0.18, 0, 0.6], [1.5, 0.24, 12, 0.72], [1.75, 0.18, 0, 0.6], [2.0, 0.15, 0, 0.87], [2.5, 0.18, 0, 0.55], [3.0, 0.23, 7, 0.65], [3.25, 0.18, 0, 0.6], [3.5, 0.24, 12, 0.72], [3.75, 0.18, 0, 0.6], [4.0, 0.15, 0, 0.87], [4.5, 0.18, 0, 0.55], [5.0, 0.23, 7, 0.65], [5.25, 0.18, 0, 0.6], [5.5, 0.24, 12, 0.72], [5.75, 0.18, 0, 0.6], [6.0, 0.15, 0, 0.87], [6.5, 0.18, 0, 0.55], [7.0, 0.23, 3, 0.65], [7.25, 0.18, 0, 0.6], [7.5, 0.24, 12, 0.72], [7.75, 0.18, 0, 0.6]]},
+      "sources": [
+        "https://theproducerschool.com/blogs/featured-blogs/building-a-rolling-bassline-like-chris-stussy-the-3-note-pattern-that-defines-modern-tech-house",
+        "https://www.youtube.com/watch?v=QsH-Ez_E3TU",
+        "https://www.youtube.com/watch?v=4Ts9u1aJSi0",
+        "https://www.youtube.com/watch?v=_6Pzhks31-s",
+        "https://www.productionmusiclive.com/blogs/news/5-basslines-every-producer-should-know-max-styler-serum-2",
+        "https://www.edmprod.com/how-to-make-tech-house/"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Tech house vocal-ish pluck stab",
+      "params": {
+        "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "70%", "A Octave": "0 oct", "A Unison": 3, "A Uni Detune": "0.08",
+        "B Enable": "Off", "C Enable": "Off", "Noise Enable": "Off", "Sub Enable": "Off",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "1500 Hz", "Filter 1 Res": "40 %",
+        "Env 1 Attack": "0.5 ms", "Env 1 Decay": "180 ms", "Env 1 Sustain": "-inf", "Env 1 Release": "90 ms"
+      },
+      "mixer_fx": [{"plugin": "Fruity Delay 3", "intent": "1/8 ping-pong 25%"}],
+      "pattern": {"bars": 2, "root_midi": 67, "notes": [[1.75, 0.2, 0, 0.8], [3.5, 0.2, 3, 0.7], [5.75, 0.2, 0, 0.8], [7.25, 0.2, -2, 0.7]]}
+    },
+    "sources": [
+      "https://theproducerschool.com/blogs/featured-blogs/building-a-rolling-bassline-like-chris-stussy-the-3-note-pattern-that-defines-modern-tech-house",
+      "https://theproducerschool.com/blogs/featured-blogs/master-chris-lakes-tech-house-sound-complete-production-breakdown",
+      "https://soundbridge.io/tech-house-bass-sound-design/",
+      "https://www.productionmusiclive.com/blogs/news/how-to-make-a-rolling-bassline"
+    ]
+  },
+
+  "drum_and_bass": {
+    "tempo": [170, 176],
+    "key_hint": "minor; F, E, G minor. Long reese notes, half-time feel against fast drums.",
+    "bass": {
+      "name": "Reese bass (two detuned unison saws beating against each other + clean sine sub, slow filter drift)",
+      "fundamental_hz": {"osc_a": 43.7, "sub": 43.7, "lowest": 43.7, "root_midi": 29},
+      "params": {
+        "Main Vol": "65%", "Mono Toggle": "On", "Legato": "On", "Porta Time": "45.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "70%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 4, "A Uni Detune": "0.12", "A Uni Blend": "75", "A Uni Width": "40", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "On", "B Level": "65%", "B Octave": "0 oct", "B Semi": "0 semitones", "B Fine": "14 cents", "B Unison": 4, "B Uni Detune": "0.16", "B Uni Blend": "75", "B Uni Width": "40", "B WT Pos": "1", "B Warp Mode": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "70%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 24", "Filter 1 Freq": "650 Hz", "Filter 1 Res": "15 %", "Filter 1 Drive": "45 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "2.0 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "1.00 s", "Env 1 Sustain": "0.0 dB", "Env 1 Release": "120 ms"
+      },
+      "not_a_parameter": {"Osc A/B wavetable": "saw (init); neuro variants use a free-running LFO on A WT Pos", "Sub routing": "keep the Sub out of the filter/distortion (Serum routing buttons); 'Sub Osc>Filter Balance' only balances F1/F2", "Unison": "keep unison width moderate so the reese survives mono"},
+      "host_automation": [{"param": "Filter 1 Freq", "shape": "sine_lfo", "rate": "1 bar", "min": "400 Hz", "max": "1400 Hz", "purpose": "slow reese movement / tearing"}],
+      "mixer_fx": [
+        {"plugin": "Fruity Blood Overdrive", "intent": "saturation on the mids"},
+        {"plugin": "Fruity Multiband Compressor", "intent": "OTT-style, low band untouched"},
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 25 Hz, notch harshness ~2.5 kHz"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 29, "notes": [[0, 1.25, 0, 0.95], [1.5, 0.5, 0, 0.8], [2.25, 1.5, -2, 0.85], [4, 1.25, 0, 0.95], [5.5, 0.6, 3, 0.8], [6, 1.5, 5, 0.85], [7.5, 0.5, -2, 0.8]]},
+      "sources": [
+        "https://www.productionmusiclive.com/blogs/news/1-2-4-how-to-make-a-reese-bass-long-deep-bass-in-serum",
+        "https://www.youtube.com/watch?v=_pqqi8_vQA0",
+        "https://www.youtube.com/watch?v=xsfu8HXl9DU",
+        "https://www.youtube.com/watch?v=0Ab-M2Y_1Kw",
+        "https://create.routenote.com/blog/how-to-make-a-reese-bass/",
+        "https://musicradar.com/how-to/how-to-create-a-tearing-neurofunk-dnb-reese-sound-in-xfer-records-serum"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Liquid DnB atmospheric pad",
+      "params": {
+        "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "65%", "A Octave": "0 oct", "A Unison": 7, "A Uni Detune": "0.15", "A Uni Blend": "75", "A Uni Width": "100",
+        "B Enable": "On", "B Level": "40%", "B Octave": "1 oct", "B Unison": 3,
+        "C Enable": "Off", "Sub Enable": "Off",
+        "Noise Enable": "On", "Noise Level": "12%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "3000 Hz", "Filter 1 Res": "10 %",
+        "Env 1 Attack": "400 ms", "Env 1 Decay": "1.50 s", "Env 1 Sustain": "-3.0 dB", "Env 1 Release": "1.20 s"
+      },
+      "mixer_fx": [{"plugin": "Fruity Reeverb 2", "intent": "long hall, 40% wet"}, {"plugin": "Fruity Chorus", "intent": "width"}],
+      "pattern": {"bars": 4, "root_midi": 53, "chord": [0, 3, 7, 10, 14], "notes": [[0, 7.5, 0, 0.6], [8, 7.5, -4, 0.6]]}
+    },
+    "sources": [
+      "https://www.instructables.com/Reese-Bass-Tutorial-in-Xfer-Records-Serum",
+      "https://www.productionmusiclive.com/blogs/news/1-2-4-how-to-make-a-reese-bass-long-deep-bass-in-serum",
+      "https://www.musicradar.com/how-to/classic-reese-bass-renegade-terrorist",
+      "https://splice.com/blog/drum-and-bass-sounds-in-serum"
+    ]
+  },
+
+  "dubstep": {
+    "tempo": [140, 150],
+    "key_hint": "minor; F, E minor. Half-time drums (snare on beat 3); wobble rate follows the groove (1/8, 1/16, triplets).",
+    "bass": {
+      "name": "Wobble/growl bass (saw + 2nd osc through resonant driven low-pass, tempo-synced cutoff wobble, clean sub)",
+      "fundamental_hz": {"osc_a": 43.7, "sub": 43.7, "lowest": 43.7, "root_midi": 29},
+      "params": {
+        "Main Vol": "65%", "Mono Toggle": "On", "Legato": "On", "Porta Time": "20.0 ms", "Porta Always": "Off", "Porta Scaled": "On", "Bend Up": "12 semitones", "Bend Down": "-12 semitones",
+        "A Enable": "On", "A Level": "75%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 3, "A Uni Detune": "0.08", "A Uni Blend": "50", "A Uni Width": "40", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "On", "B Level": "55%", "B Octave": "0 oct", "B Semi": "0 semitones", "B Fine": "0 cents", "B Unison": 1, "B Uni Detune": "0.00", "B Uni Blend": "0", "B Uni Width": "0", "B WT Pos": "1", "B Warp Mode": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "70%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 24", "Filter 1 Freq": "300 Hz", "Filter 1 Res": "40 %", "Filter 1 Drive": "60 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "1.0 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "1.00 s", "Env 1 Sustain": "0.0 dB", "Env 1 Release": "60 ms"
+      },
+      "not_a_parameter": {"Osc B wavetable": "square or a growl table; B Warp 'FM (from A)' ~20% for the robotic growl", "Mod routing": "LFO 1 (trig, 1/8 or 1/16) -> Filter 1 Freq and/or A WT Pos / FM amount; recreated via host_automation", "Sub": "Sub should bypass the filter so it does not wobble"},
+      "host_automation": [{"param": "Filter 1 Freq", "shape": "sine_lfo", "rate": "1/8", "min": "150 Hz", "max": "2200 Hz", "purpose": "the wobble; switch to 1/16 or 1/8T per bar for variation"}],
+      "mixer_fx": [
+        {"plugin": "Fruity Blood Overdrive", "intent": "heavy distortion after the filter"},
+        {"plugin": "Fruity Multiband Compressor", "intent": "OTT-style"},
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 25 Hz"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 29, "notes": [[0, 0.75, 0, 1.0], [0.75, 0.75, 0, 0.9], [1.5, 0.5, 0, 0.9], [3, 0.5, 0, 0.85], [3.5, 0.5, 12, 0.9], [4, 0.75, 0, 1.0], [4.75, 0.75, 0, 0.9], [5.5, 0.5, 1, 0.9], [7, 0.5, -2, 0.85], [7.5, 0.5, 0, 0.9]]},
+      "sources": [
+        "https://violetrecording.com/how-to-make-a-wobble-bass/",
+        "https://www.youtube.com/watch?v=Fxyi_wz7u4U",
+        "https://www.youtube.com/watch?v=lu4YTTeOJsE",
+        "https://www.youtube.com/watch?v=7KYkZlL5mAE",
+        "https://bassgorilla.com/serum-bass-tutorial-robotic-digital-dubstep-bass/",
+        "https://www.adsrsounds.com/serum-tutorials/making-a-skrillex-growl-in-serum/",
+        "https://www.soundbridge.io/ways-wobble"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Dubstep screech/growl lead (bright, distorted, pitch-bent)",
+      "params": {
+        "Mono Toggle": "On", "Legato": "On", "Porta Time": "30.0 ms",
+        "A Enable": "On", "A Level": "75%", "A Octave": "0 oct", "A Unison": 2, "A Uni Detune": "0.06",
+        "B Enable": "On", "B Level": "55%", "B Octave": "1 oct",
+        "C Enable": "Off", "Noise Enable": "Off", "Sub Enable": "Off",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "4000 Hz", "Filter 1 Res": "30 %", "Filter 1 Drive": "70 %",
+        "Env 1 Attack": "0.5 ms", "Env 1 Decay": "500 ms", "Env 1 Sustain": "-6.0 dB", "Env 1 Release": "100 ms"
+      },
+      "host_automation": [{"param": "Filter 1 Freq", "shape": "ramp_down", "rate": "1/4", "min": "1200 Hz", "max": "6000 Hz", "purpose": "vowel-ish movement"}],
+      "mixer_fx": [{"plugin": "Fruity Fast Dist", "intent": "hard clip"}, {"plugin": "Fruity Reeverb 2", "intent": "short, 15% wet"}],
+      "pattern": {"bars": 1, "root_midi": 53, "notes": [[0, 0.5, 0, 0.9], [0.75, 0.25, 12, 0.8], [1.5, 0.5, 7, 0.9]]}
+    },
+    "sources": [
+      "https://violetrecording.com/how-to-make-a-wobble-bass/",
+      "https://www.musicradar.com/how-to/lfo-wobble-bass",
+      "https://www.adsrsounds.com/serum-tutorials/making-a-skrillex-growl-in-serum/",
+      "https://bassgorilla.com/serum-tutorial-super-growl-bass-in-ableton-live/"
+    ]
+  },
+
+  "trap": {
+    "tempo": [130, 150],
+    "key_hint": "minor; C#, F, G minor. Half-time feel; 808 follows the kick with glides (portamento) between notes.",
+    "bass": {
+      "name": "Trap 808 (sine body + filtered saw for harmonics, long tail, legato glides, pitch-punch, driven)",
+      "fundamental_hz": {"osc_a": 49.0, "sub": 49.0, "lowest": 49.0, "root_midi": 31},
+      "params": {
+        "Main Vol": "70%", "Mono Toggle": "On", "Legato": "On", "Porta Time": "70.0 ms", "Porta Always": "Off", "Porta Scaled": "Off",
+        "A Enable": "On", "A Level": "22%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 1, "A Uni Detune": "0.00", "A Uni Blend": "0", "A Uni Width": "0", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "85%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "320 Hz", "Filter 1 Res": "0 %", "Filter 1 Drive": "55 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "0.5 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "1.50 s", "Env 1 Sustain": "-6.0 dB", "Env 1 Release": "250 ms",
+        "Env 2 Attack": "0.5 ms", "Env 2 Hold": "0.0 ms", "Env 2 Decay": "80 ms", "Env 2 Sustain": "0%", "Env 2 Release": "15 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "sine or triangle (init saw is fine filtered at 320 Hz: adds harmonics for phones)", "Mod routing": "Env 2 (80 ms decay, 0 sustain) -> A/Sub coarse pitch +12 st for the punchy pitch drop", "Slides": "glides happen only on overlapping notes (Legato On)"},
+      "host_automation": [],
+      "mixer_fx": [
+        {"plugin": "Fruity Soft Clipper", "intent": "saturation so the 808 reads on phones"},
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 25 Hz"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 31, "notes": [[0, 1.5, 0, 1.0], [1.75, 0.5, 0, 0.8], [2.5, 0.6, 0, 0.9], [3, 0.5, 12, 0.85], [3.5, 0.5, 0, 0.8], [4, 1.5, 0, 1.0], [5.75, 0.85, -2, 0.85], [6.5, 1.1, 3, 0.9], [7.5, 0.5, -2, 0.8]]},
+      "sources": [
+        "https://violetrecording.com/how-to-design-an-808/",
+        "https://violetrecording.com/how-to-make-808-slides/",
+        "https://www.youtube.com/watch?v=MVIyIh1EMLs",
+        "https://www.youtube.com/watch?v=TO4uFn8iUzw",
+        "https://www.youtube.com/watch?v=cSZKh9SALGc",
+        "https://www.attackmagazine.com/technique/synth-secrets/808-bass-with-saturation/"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Trap bell / pluck melody",
+      "params": {
+        "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "65%", "A Octave": "1 oct", "A Unison": 1,
+        "B Enable": "On", "B Level": "35%", "B Octave": "2 oct", "B Unison": 1,
+        "C Enable": "Off", "Noise Enable": "Off", "Sub Enable": "Off",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "5000 Hz", "Filter 1 Res": "5 %",
+        "Env 1 Attack": "0.5 ms", "Env 1 Decay": "700 ms", "Env 1 Sustain": "-inf", "Env 1 Release": "400 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "sine/bell (FM-ish)", "Warp": "A Warp Mode FM from B for bell tone"},
+      "mixer_fx": [{"plugin": "Fruity Reeverb 2", "intent": "plate, 25%"}, {"plugin": "Fruity Delay 3", "intent": "1/8 dotted, 20%"}],
+      "pattern": {"bars": 2, "root_midi": 61, "notes": [[0, 0.5, 0, 0.8], [0.75, 0.25, 3, 0.7], [1.5, 0.5, 7, 0.8], [2.5, 0.5, 5, 0.7], [4, 0.5, 0, 0.8], [5, 0.5, 10, 0.7], [6, 1.0, 7, 0.8]]}
+    },
+    "sources": [
+      "https://www.adsrsounds.com/serum-tutorials/how-to-design-bass-for-different-genres-in-serum/",
+      "https://bvker.com/?p=16014",
+      "https://violetrecording.com/how-to-design-an-808/",
+      "https://www.attackmagazine.com/technique/synth-secrets/808-bass-with-saturation/"
+    ]
+  },
+
+  "hip_hop": {
+    "tempo": [85, 95],
+    "key_hint": "minor/dorian; jazzy chords. Boom-bap: bass locks to the kick, swung 16ths.",
+    "bass": {
+      "name": "Hip-hop sub/808 (warm sine body, short pitch punch, medium decay locked to the kick, light grit)",
+      "fundamental_hz": {"osc_a": 55.0, "sub": 55.0, "lowest": 55.0, "root_midi": 33},
+      "params": {
+        "Main Vol": "70%", "Mono Toggle": "On", "Legato": "On", "Porta Time": "40.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "25%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 1, "A Uni Detune": "0.00", "A Uni Blend": "0", "A Uni Width": "0", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "85%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "260 Hz", "Filter 1 Res": "5 %", "Filter 1 Drive": "40 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "2.0 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "600 ms", "Env 1 Sustain": "-12.0 dB", "Env 1 Release": "120 ms",
+        "Env 2 Attack": "0.5 ms", "Env 2 Hold": "0.0 ms", "Env 2 Decay": "40 ms", "Env 2 Sustain": "0%", "Env 2 Release": "15 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "init saw, filtered (or triangle) for audibility on small speakers", "Mod routing": "Env 2 -> coarse pitch +7..+12 st for the 'boom' click", "Swing": "swing 16ths ~55-60% in FL (or Serum 'Swing')"},
+      "host_automation": [],
+      "mixer_fx": [
+        {"plugin": "Fruity Blood Overdrive", "intent": "light tape-style saturation"},
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 28 Hz, LP 5 kHz"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 33, "notes": [[0, 0.9, 0, 1.0], [1.75, 0.25, 0, 0.75], [2.5, 1.0, 0, 0.9], [4, 0.9, 0, 1.0], [5.75, 0.25, 3, 0.75], [6.5, 0.75, 5, 0.9], [7.25, 0.6, -2, 0.85]]},
+      "sources": [
+        "https://www.youtube.com/watch?v=d9HS8p5v3bI",
+        "https://www.youtube.com/watch?v=Yl1SOj_UP-g",
+        "https://www.youtube.com/watch?v=Z0bFzqx2CxI",
+        "https://www.youtube.com/watch?v=DvlZjCK3C9k",
+        "https://violetrecording.com/how-to-design-an-808/"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Dusty keys / Rhodes-like chords",
+      "params": {
+        "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "65%", "A Octave": "0 oct", "A Unison": 2, "A Uni Detune": "0.04",
+        "B Enable": "On", "B Level": "30%", "B Octave": "1 oct",
+        "C Enable": "Off", "Sub Enable": "Off",
+        "Noise Enable": "On", "Noise Level": "8%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "1800 Hz", "Filter 1 Res": "5 %",
+        "Env 1 Attack": "3.0 ms", "Env 1 Decay": "1.20 s", "Env 1 Sustain": "-12.0 dB", "Env 1 Release": "500 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "sine/electric-piano", "Noise sample": "vinyl crackle"},
+      "mixer_fx": [{"plugin": "Fruity Chorus", "intent": "tape wobble"}, {"plugin": "Fruity Reeverb 2", "intent": "room 20%"}],
+      "pattern": {"bars": 4, "root_midi": 57, "chord": [0, 3, 7, 10, 14], "notes": [[0, 1.75, 0, 0.7], [2.5, 1.25, 0, 0.6], [4, 1.75, -2, 0.7], [8, 1.75, -4, 0.7], [12, 3.5, -5, 0.7]]}
+    },
+    "sources": [
+      "https://www.adsrsounds.com/serum-tutorials/how-to-design-bass-for-different-genres-in-serum/",
+      "https://www.adsrsounds.com/sound-design-tutorials/the-anatomy-of-an-808-the-ultimate-guide-to-massive-low-end/"
+    ]
+  },
+
+  "future_bass": {
+    "tempo": [140, 160],
+    "key_hint": "major/minor 7th and 9th chords; pitch-bent, volume-pumped supersaw chords are the signature.",
+    "bass": {
+      "name": "Future bass sub + supersaw layer (clean sine sub for the fundamental, 7-voice saw an octave up for width)",
+      "fundamental_hz": {"osc_a": 110.0, "sub": 55.0, "lowest": 55.0, "root_midi": 33},
+      "params": {
+        "Main Vol": "65%", "Mono Toggle": "On", "Legato": "On", "Porta Time": "30.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "45%", "A Octave": "1 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 7, "A Uni Detune": "0.18", "A Uni Blend": "60", "A Uni Width": "100", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "On", "B Level": "35%", "B Octave": "0 oct", "B Semi": "0 semitones", "B Fine": "0 cents", "B Unison": 1, "B Uni Detune": "0.00", "B Uni Blend": "0", "B Uni Width": "0", "B WT Pos": "1", "B Warp Mode": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "85%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "900 Hz", "Filter 1 Res": "10 %", "Filter 1 Drive": "15 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "3.0 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "600 ms", "Env 1 Sustain": "-3.0 dB", "Env 1 Release": "150 ms"
+      },
+      "not_a_parameter": {"Osc A/B wavetable": "saw (init)", "Routing": "keep the Sub mono and out of the filter; supersaw width comes only from Osc A"},
+      "host_automation": [{"param": "Filter 1 Freq", "shape": "sine_lfo", "rate": "1/4", "min": "500 Hz", "max": "1800 Hz", "purpose": "optional future-bass wobble on the saw layer"}],
+      "mixer_fx": [
+        {"plugin": "Fruity Multiband Compressor", "intent": "OTT-style on the highs"},
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 28 Hz"},
+        {"plugin": "Fruity Balance", "intent": "heavy sidechain pump from kick"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 33, "notes": [[0, 1.5, 0, 0.95], [1.5, 0.5, 0, 0.8], [2, 2.0, -4, 0.9], [4, 1.5, 3, 0.95], [5.5, 0.5, 3, 0.8], [6, 1.5, -2, 0.9], [7.5, 0.5, -2, 0.8]]},
+      "sources": [
+        "https://www.youtube.com/watch?v=yyLxRBIHfko",
+        "https://www.youtube.com/watch?v=jUNgXCGbf14",
+        "https://www.youtube.com/watch?v=rwy-vTJXK9w",
+        "https://www.edmprod.com/how-to-make-future-bass-like-flume/",
+        "https://sounds.pauseplayrepeat.com/blogs/news/serum-tutorial-flume-style-reese-bass-preset",
+        "https://www.productionmusiclive.com/blogs/news/10-supersaw-tips-for-xfer-serum-get-a-big-lush-sound-without-layering"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Supersaw chords (wide, bright, pumped)",
+      "params": {
+        "Main Vol": "60%", "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "70%", "A Octave": "0 oct", "A Unison": 9, "A Uni Detune": "0.18", "A Uni Blend": "80", "A Uni Width": "100",
+        "B Enable": "On", "B Level": "55%", "B Octave": "1 oct", "B Unison": 7, "B Uni Detune": "0.15", "B Uni Blend": "75",
+        "C Enable": "Off", "Sub Enable": "Off",
+        "Noise Enable": "On", "Noise Level": "10%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "8000 Hz", "Filter 1 Res": "5 %",
+        "Env 1 Attack": "5.0 ms", "Env 1 Decay": "800 ms", "Env 1 Sustain": "-6.0 dB", "Env 1 Release": "300 ms"
+      },
+      "host_automation": [{"param": "Main Vol", "shape": "sidechain_duck", "rate": "1/4", "min": "25%", "max": "70%", "purpose": "classic pump (or use fl_sidechain on the mixer insert)"}],
+      "not_a_parameter": {"Mod routing": "LFO -> A/B Fine (vibrato) and Env -> A Coarse Pitch for the pitch-bend swell into chords"},
+      "mixer_fx": [{"plugin": "Fruity Multiband Compressor", "intent": "OTT-style"}, {"plugin": "Fruity Reeverb 2", "intent": "hall 25%"}],
+      "pattern": {"bars": 4, "root_midi": 65, "chord": [0, 4, 7, 11, 14], "notes": [[0, 0.5, 0, 0.8], [0.75, 0.5, 0, 0.7], [1.5, 0.5, 0, 0.8], [2.5, 1.25, 0, 0.8], [4, 0.5, -3, 0.8], [4.75, 0.5, -3, 0.7], [5.5, 2.0, -3, 0.8], [8, 3.5, -5, 0.8], [12, 3.5, -7, 0.8]]}
+    },
+    "sources": [
+      "https://www.productionmusiclive.com/blogs/news/10-supersaw-tips-for-xfer-serum-get-a-big-lush-sound-without-layering",
+      "https://www.adsrsounds.com/serum-tutorials/serum-supersaw-wavetables-pro-tip/",
+      "https://violetrecording.com/how-to-make-future-bass/",
+      "https://feelyoursound.com/articles/future-bass-tutorial/"
+    ]
+  },
+
+  "trance": {
+    "tempo": [136, 140],
+    "key_hint": "minor; A, F#, B minor. Rolling offbeat 'galloping' bass, big supersaw leads and plucks.",
+    "bass": {
+      "name": "Trance rolling offbeat bass (gallop: 3 plucky 16ths after each kick, two saws + sub, Env 2 filter pluck)",
+      "fundamental_hz": {"osc_a": 55.0, "sub": 55.0, "lowest": 55.0, "root_midi": 33},
+      "params": {
+        "Main Vol": "68%", "Mono Toggle": "On", "Legato": "Off", "Porta Time": "0.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "70%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 1, "A Uni Detune": "0.00", "A Uni Blend": "0", "A Uni Width": "0", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "On", "B Level": "45%", "B Octave": "0 oct", "B Semi": "0 semitones", "B Fine": "8 cents", "B Unison": 1, "B Uni Detune": "0.00", "B Uni Blend": "0", "B Uni Width": "0", "B WT Pos": "1", "B Warp Mode": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "60%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 24", "Filter 1 Freq": "420 Hz", "Filter 1 Res": "25 %", "Filter 1 Drive": "20 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "0.5 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "110 ms", "Env 1 Sustain": "-inf", "Env 1 Release": "30 ms",
+        "Env 2 Attack": "0.5 ms", "Env 2 Hold": "0.0 ms", "Env 2 Decay": "70 ms", "Env 2 Sustain": "0%", "Env 2 Release": "30 ms"
+      },
+      "not_a_parameter": {"Osc A/B wavetable": "saw (init)", "Mod routing": "Env 2 -> Filter 1 Freq about +35%; Velocity -> Filter 1 Freq"},
+      "host_automation": [{"param": "Filter 1 Freq", "shape": "ramp_up", "rate": "16 bars", "min": "300 Hz", "max": "900 Hz", "purpose": "breakdown/build filter sweep"}],
+      "mixer_fx": [
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 30 Hz, LP 5 kHz"},
+        {"plugin": "Fruity Balance", "intent": "sidechain from kick (mandatory with a rolling bass)"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 33, "notes": [[0.25, 0.2, 0, 0.6], [0.5, 0.2, 0, 0.9], [0.75, 0.2, 0, 0.75], [1.25, 0.2, 0, 0.6], [1.5, 0.2, 0, 0.9], [1.75, 0.2, 0, 0.75], [2.25, 0.2, 0, 0.6], [2.5, 0.2, 0, 0.9], [2.75, 0.2, 0, 0.75], [3.25, 0.2, 0, 0.6], [3.5, 0.2, 0, 0.9], [3.75, 0.2, 0, 0.75], [4.25, 0.2, -4, 0.6], [4.5, 0.2, -4, 0.9], [4.75, 0.2, -4, 0.75], [5.25, 0.2, -4, 0.6], [5.5, 0.2, -4, 0.9], [5.75, 0.2, -4, 0.75], [6.25, 0.2, -2, 0.6], [6.5, 0.2, -2, 0.9], [6.75, 0.2, -2, 0.75], [7.25, 0.2, -2, 0.6], [7.5, 0.2, -2, 0.9], [7.75, 0.2, -2, 0.75]]},
+      "sources": [
+        "https://theproducerschool.com/blogs/featured-blogs/5-essential-bass-patterns-that-define-hard-house-and-trance-music",
+        "https://www.youtube.com/watch?v=h9V2zufD5fs",
+        "https://www.youtube.com/watch?v=yaE5yqVy85g",
+        "https://www.youtube.com/watch?v=kb59URy0jZU",
+        "https://www.youtube.com/watch?v=GPG_Eb91S8E",
+        "https://musicradar.com/tuition/tech/creating-a-trance-style-rolling-bassline-606885"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Supersaw trance pluck/lead",
+      "params": {
+        "Main Vol": "60%", "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "72%", "A Octave": "0 oct", "A Unison": 9, "A Uni Detune": "0.20", "A Uni Blend": "80", "A Uni Width": "100",
+        "B Enable": "On", "B Level": "50%", "B Octave": "1 oct", "B Unison": 7, "B Uni Detune": "0.16",
+        "C Enable": "Off", "Noise Enable": "Off", "Sub Enable": "Off",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 12", "Filter 1 Freq": "4000 Hz", "Filter 1 Res": "15 %",
+        "Env 1 Attack": "0.5 ms", "Env 1 Decay": "400 ms", "Env 1 Sustain": "-12.0 dB", "Env 1 Release": "250 ms"
+      },
+      "not_a_parameter": {"Mod routing": "Env 2 -> Filter 1 Freq (short) for extra pluck"},
+      "mixer_fx": [{"plugin": "Fruity Delay 3", "intent": "1/8 dotted ping-pong 30%"}, {"plugin": "Fruity Reeverb 2", "intent": "large hall 35%"}],
+      "pattern": {"bars": 2, "root_midi": 69, "notes": [[0, 0.25, 0, 0.8], [0.5, 0.25, 7, 0.7], [1, 0.25, 12, 0.8], [1.5, 0.25, 7, 0.7], [2, 0.25, 3, 0.8], [2.5, 0.25, 7, 0.7], [3, 0.25, 10, 0.8], [3.5, 0.25, 7, 0.7], [4, 0.25, -2, 0.8], [4.5, 0.25, 5, 0.7], [5, 0.25, 10, 0.8], [5.5, 0.25, 5, 0.7], [6, 0.25, 2, 0.8], [6.5, 0.25, 5, 0.7], [7, 0.5, 7, 0.8]]}
+    },
+    "sources": [
+      "https://www.syntorial.com/tutorials/crafting-the-supersaw-edm-dance-synth-lead-a-step-by-step-guide",
+      "https://www.adsrsounds.com/fm8-tutorials/making-a-classic-supersaw-fm8-progressive-pluck-synth/",
+      "https://recapio.com/digest/serum-2-tutorial-beautiful-plucky-lead-style-of-colorize-purified-by-the-sound-design-channel",
+      "https://theproducerschool.com/blogs/music-production/best-hard-house-trance-serum-presets-2025-complete-guide"
+    ]
+  },
+
+  "pop_edm": {
+    "tempo": [126, 130],
+    "key_hint": "minor or major; F, G, A. Big room: huge detuned supersaw/hardsaw lead, simple offbeat or root bass, long builds.",
+    "bass": {
+      "name": "Pop/EDM plucky saw + sub bass (offbeat 8ths following the chords, short filter pluck)",
+      "fundamental_hz": {"osc_a": 65.4, "sub": 65.4, "lowest": 65.4, "root_midi": 36},
+      "params": {
+        "Main Vol": "68%", "Mono Toggle": "On", "Legato": "Off", "Porta Time": "0.0 ms", "Porta Always": "Off", "Porta Scaled": "On",
+        "A Enable": "On", "A Level": "65%", "A Octave": "0 oct", "A Semi": "0 semitones", "A Fine": "0 cents", "A Unison": 3, "A Uni Detune": "0.08", "A Uni Blend": "50", "A Uni Width": "30", "A WT Pos": "1", "A Warp Mode": "Off",
+        "B Enable": "Off",
+        "C Enable": "Off", "Noise Enable": "Off",
+        "Sub Enable": "On", "Sub Shape": "Sine", "Sub Octave": "0 oct", "Sub Level": "70%",
+        "Filter 1 On": "On", "Filter 1 Type": "MG Low 24", "Filter 1 Freq": "600 Hz", "Filter 1 Res": "20 %", "Filter 1 Drive": "25 %", "Filter 1 Wet": "100 %",
+        "Filter 2 On": "Off",
+        "Env 1 Attack": "0.5 ms", "Env 1 Hold": "0.0 ms", "Env 1 Decay": "220 ms", "Env 1 Sustain": "-inf", "Env 1 Release": "60 ms",
+        "Env 2 Attack": "0.5 ms", "Env 2 Hold": "0.0 ms", "Env 2 Decay": "150 ms", "Env 2 Sustain": "0%", "Env 2 Release": "60 ms"
+      },
+      "not_a_parameter": {"Osc A wavetable": "saw (init)", "Mod routing": "Env 2 -> Filter 1 Freq about +30% for the pluck"},
+      "host_automation": [],
+      "mixer_fx": [
+        {"plugin": "Fruity Parametric EQ 2", "intent": "HP 30 Hz"},
+        {"plugin": "Fruity Multiband Compressor", "intent": "OTT-style, subtle"},
+        {"plugin": "Fruity Balance", "intent": "sidechain from kick"}
+      ],
+      "pattern": {"bars": 2, "root_midi": 36, "notes": [[0.5, 0.35, 0, 0.9], [1.5, 0.35, 0, 0.85], [1.75, 0.2, 12, 0.7], [2.5, 0.35, 7, 0.9], [3.5, 0.35, 7, 0.85], [3.75, 0.2, 19, 0.7], [4.5, 0.35, -3, 0.9], [5.5, 0.35, -3, 0.85], [5.75, 0.2, 9, 0.7], [6.5, 0.35, -7, 0.9], [7.5, 0.35, -7, 0.85], [7.75, 0.2, 5, 0.7]]},
+      "sources": [
+        "https://www.youtube.com/watch?v=Aa151MAFU2M",
+        "https://www.youtube.com/watch?v=n1NQ2ZQKchE",
+        "https://www.youtube.com/watch?v=0vABH5pzIP4",
+        "https://www.youtube.com/watch?v=lZPz_eV7Iz4",
+        "https://splice.com/blog/how-to-make-basslines/"
+      ]
+    },
+    "lead_or_pad": {
+      "name": "Big room supersaw lead",
+      "params": {
+        "Main Vol": "62%", "Mono Toggle": "Off",
+        "A Enable": "On", "A Level": "75%", "A Octave": "0 oct", "A Unison": 7, "A Uni Detune": "0.25", "A Uni Blend": "85", "A Uni Width": "100",
+        "B Enable": "On", "B Level": "60%", "B Octave": "1 oct", "B Unison": 7, "B Uni Detune": "0.22", "B Uni Blend": "80",
+        "C Enable": "Off", "Sub Enable": "Off",
+        "Noise Enable": "On", "Noise Level": "8%",
+        "Filter 1 On": "Off", "Filter 2 On": "Off",
+        "Env 1 Attack": "0.5 ms", "Env 1 Decay": "300 ms", "Env 1 Sustain": "-3.0 dB", "Env 1 Release": "200 ms"
+      },
+      "not_a_parameter": {"Osc wavetables": "saw (hardsaw: saw with A Warp Mode 'Sync'/'Bend' if available)"},
+      "mixer_fx": [{"plugin": "Fruity Fast Dist", "intent": "light grit"}, {"plugin": "Fruity Multiband Compressor", "intent": "OTT-style"}, {"plugin": "Fruity Reeverb 2", "intent": "big hall 25%"}, {"plugin": "Fruity Balance", "intent": "sidechain pump"}],
+      "pattern": {"bars": 2, "root_midi": 67, "notes": [[0, 0.5, 0, 0.9], [0.75, 0.5, 0, 0.8], [1.5, 0.5, 3, 0.9], [2.5, 0.5, 5, 0.9], [3.5, 0.5, 7, 0.9], [4, 1.0, 5, 0.9], [5.5, 0.5, 3, 0.8], [6.5, 1.25, 0, 0.9]]}
+    },
+    "sources": [
+      "https://www.productionmusiclive.com/blogs/news/10-supersaw-tips-for-xfer-serum-get-a-big-lush-sound-without-layering",
+      "https://www.adsrsounds.com/serum-tutorials/kshmr-tiesto-secrets-synth-lead-in-serum/",
+      "https://www.syntorial.com/tutorials/crafting-the-supersaw-edm-dance-synth-lead-a-step-by-step-guide",
+      "https://ask.audio/articles/how-to-create-big-layered-leads-for-edm-productions"
+    ]
+  }
+}

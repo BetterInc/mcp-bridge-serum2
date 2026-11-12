@@ -1,0 +1,50 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # FL Studio's embedded Python
+
+      - name: Install tools
+        run: python -m pip install --quiet cryptography pyflakes
+
+      - name: extension.py is up to date with src/
+        if: hashFiles('build.py') != ''
+        run: |
+          python build.py
+          git diff --exit-code -- extension.py
+
+      - name: Compile
+        run: python -m compileall -q $(git ls-files '*.py')
+
+      # src/tools.py is a fragment that build.py appends to the codec, so it is linted as part of
+      # extension.py. Undefined names and syntax errors fail; style warnings are only reported.
+      - name: Lint (pyflakes)
+        run: |
+          python -m pyflakes $(git ls-files '*.py' | grep -v '^src/tools.py$') > pyflakes.txt || true
+          cat pyflakes.txt
+          if grep -E "undefined name|syntax|unexpected indent" pyflakes.txt; then exit 1; fi
+
+      - name: Manifest
+        run: |
+          python - <<'PY'
+          import json
+          m = json.load(open("manifest.json", encoding="utf-8"))
+          for k in ("id", "name", "version", "api_version"):
+              assert m.get(k) not in (None, ""), f"manifest.json: missing {k}"
+          assert m["api_version"] == 1, "this extension targets extension API 1"
+          print(m["id"], m["version"], "api", m["api_version"])
+          PY
+
+      - name: Pack (unsigned smoke test)
+        run: python tools/pack.py --unsigned --out dist

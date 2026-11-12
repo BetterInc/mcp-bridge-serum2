@@ -1,0 +1,56 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: python -m pip install --quiet cryptography
+
+      - name: Build extension.py
+        if: hashFiles('build.py') != ''
+        run: python build.py
+
+      - name: Tag matches manifest version
+        run: |
+          v=$(python -c "import json; print(json.load(open('manifest.json', encoding='utf-8'))['version'])")
+          if [ "v$v" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match manifest.json version $v"
+            exit 1
+          fi
+
+      - name: Pack and sign
+        env:
+          EXTENSION_SIGNING_KEY: ${{ secrets.EXTENSION_SIGNING_KEY }}
+        run: |
+          if [ -z "$EXTENSION_SIGNING_KEY" ]; then
+            echo "::error::repository secret EXTENSION_SIGNING_KEY (PEM) is not set"
+            exit 1
+          fi
+          umask 077
+          key="$RUNNER_TEMP/extension_signing_key.pem"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$EXTENSION_SIGNING_KEY" > "$key"
+          python tools/pack.py --key "$key" --out dist
+          ls -l dist
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(python -c "import json; print(json.load(open('manifest.json', encoding='utf-8'))['id'])")
+          gh release create "$GITHUB_REF_NAME" "dist/$id.bflx" "dist/$id.bflx.sig" \
+            --title "$id $GITHUB_REF_NAME" --generate-notes --verify-tag

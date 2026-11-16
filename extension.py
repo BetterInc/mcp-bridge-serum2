@@ -212,7 +212,15 @@ def cmd_serum_recipes(_):
 
 def cmd_serum_recipe(args):
     """Apply a genre recipe (e.g. techno/bass) to a Serum 2 channel; returns its pattern and notes."""
-    recipe = _recipes()[args["genre"]][args.get("part", "bass")]
+    recipes = _recipes()
+    genres = sorted(g for g in recipes if not g.startswith("_"))
+    genre, part = str(args.get("genre", "")), str(args.get("part", "bass"))
+    if genre not in genres:
+        raise ValueError(f"unknown genre {genre!r}; one of {genres}")
+    parts = sorted(p for p, v in recipes[genre].items() if isinstance(v, dict) and "params" in v)
+    if part not in parts:
+        raise ValueError(f"{genre} has no part {part!r}; one of {parts}")
+    recipe = recipes[genre][part]
     if args.get("_continue"):
         result = cmd_serum_set(args)
     else:
@@ -354,6 +362,8 @@ def cmd_serum_preset_load(args):
     """Load a .SerumPreset (by name or path) into a running Serum 2 instance."""
     index = api.plugin_channel(args, "Serum 2")
     n = api.native
+    if not str(args.get("preset") or "").strip():
+        raise ValueError("preset is required: a preset name like '808 - Diesel' or a full .SerumPreset path")
     path = _find_preset(str(args["preset"]))
     data = api.read_file(path)
     if not data:
@@ -408,9 +418,12 @@ def cmd_serum_state_set(args):
     and load it into the live instance. Paths starting with 'controller.' go to the controller
     state (macro names, preset name/author/description)."""
     index = api.plugin_channel(args, "Serum 2")
+    changes = args.get("set")
+    if not isinstance(changes, dict) or not changes:
+        raise ValueError("set must be an object {dotted path: value}")
     inner, meta, patch = _serum_read(index)
     controller = None
-    for path, value in (args.get("set") or {}).items():
+    for path, value in changes.items():
         if path.startswith("controller."):
             controller = controller or _serum_controller(inner)
             if not controller:

@@ -1,7 +1,7 @@
 {
   "id": "mcp-bridge-serum2",
   "name": "MCP Bridge Serum 2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Full control of Xfer Serum 2 from BetterFL MCP Bridge: knobs by displayed value, wavetables, mod matrix, LFO shapes, FX racks, presets and genre recipes.",
   "api_version": 1,
   "plugins": [
